@@ -15,19 +15,13 @@ def create_structure(base_path):
         "README.md",
         "run.py",
         "settings.yaml",
-        "app/api/resources.py",
-        "app/api/__init__.py",
         "app/config/configuration.py",
+        "app/config/extensions.py",
+        "app/config/logging_config.py",
         "app/config/__init__.py",
-        "app/extensions/database.py",
-        "app/extensions/visuals.py",
+        "app/__init__.py",
         "app/extensions/__init__.py",
-        "app/models/Example.py",
         "app/tests/",
-        "app/web/views.py",
-        "app/web/__init__.py",
-        "app/web/templates/example.html",
-        "app/web/templates/index.html",
     ]
 
     try:
@@ -42,7 +36,6 @@ def create_structure(base_path):
     except Exception as e:
         click.secho(f"Erro ao criar a estrutura de pastas e arquivos: {e}", fg="red", bold=True)
         raise
-
 
 # Função para copiar o conteúdo dos templates
 def copy_template(src, dst):
@@ -59,7 +52,6 @@ def copy_template(src, dst):
     except Exception as e:
         click.secho(f"Erro ao copiar os templates: {e}", fg="red", bold=True)
         raise
-
 
 # Função para atualizar o arquivo settings.yaml
 def update_extension_in_yaml(extension):
@@ -81,18 +73,6 @@ def update_extension_in_yaml(extension):
     except Exception as e:
         click.secho(f"Erro ao atualizar o settings.yaml: {e}", fg="red", bold=True)
         raise
-
-# Função para atualizar o requirements.txt
-def update_requirements(package):
-    """Adiciona pacotes ao requirements.txt e instala a dependência."""
-    try:
-        with open("requirements.txt", "a", encoding="utf-8") as f:
-            f.write(f"{package}\n")
-        subprocess.run(["pip", "install", package], check=True)
-        click.secho(f"{package} instalado e adicionado ao requirements.txt.", fg="green", bold=True)
-    except Exception as e:
-        click.secho(f"Erro ao atualizar requirements.txt: {e}", fg="red", bold=True)
-        raise
         
 # Comando para inicializar o projeto
 @click.command(name="init-project")
@@ -100,7 +80,8 @@ def update_requirements(package):
 def init_project(overwrite):
     """Inicializa a estrutura base do projeto Flask."""
     base_path = os.getcwd()
-    template_path = os.path.join(os.path.dirname(__file__), "templates")
+    # template_path = os.path.join(os.path.dirname(__file__), "templates") # full
+    template_path = os.path.join(os.path.dirname(__file__), "templates-basic")
 
     if not os.path.exists(template_path):
         click.secho("Erro: Diretório de templates não encontrado. 🚨", fg="red", bold=True)
@@ -136,7 +117,6 @@ def init_project(overwrite):
     subprocess.run(["pip", "freeze"], stdout=open("requirements.txt", "w"), check=True)
     click.secho("✅ Projeto Flask inicializado com sucesso! 🎉", fg="green", bold=True)
 
-
 # Comando para adicionar suporte a API
 @click.command()
 def add_api():
@@ -157,7 +137,6 @@ def add_api():
     except Exception as e:
         click.secho(f"Erro ao adicionar API: {e}", fg="red", bold=True)
 
-
 # Comando para adicionar suporte a banco de dados
 @click.command()
 def add_db():
@@ -167,9 +146,9 @@ def add_db():
 
     try:
         # Cria a estrutura de banco de dados
-        os.makedirs(os.path.join(base_path, "extensions"), exist_ok=True)
-        os.makedirs(os.path.join(base_path, "models"), exist_ok=True)
-        copy_template(template_path, os.path.join(base_path, "extensions"))
+        os.makedirs(os.path.join(base_path, "app", "extensions"), exist_ok=True)
+        os.makedirs(os.path.join(base_path, "app", "models"), exist_ok=True)
+        copy_template(template_path, os.path.join(base_path, "app", "extensions"))
 
         # Atualiza o settings.yaml e requirements.txt
         update_extension_in_yaml("app.extensions.database:init_app")
@@ -178,7 +157,6 @@ def add_db():
         click.secho("✅ Banco de dados adicionado com sucesso! 💾", fg="green", bold=True)
     except Exception as e:
         click.secho(f"Erro ao adicionar banco de dados: {e}", fg="red", bold=True)
-
 
 # Comando para adicionar suporte a web
 @click.command()
@@ -189,8 +167,8 @@ def add_web():
 
     try:
         # Cria a estrutura de web
-        os.makedirs(os.path.join(base_path, "web/templates"), exist_ok=True)
-        copy_template(template_path, os.path.join(base_path, "web"))
+        os.makedirs(os.path.join(base_path, "web", "templates"), exist_ok=True)
+        copy_template(template_path, os.path.join(base_path, "web", "templates"))
 
         # Atualiza o settings.yaml e requirements.txt
         update_extension_in_yaml("app.web:init_app")
@@ -199,7 +177,6 @@ def add_web():
         click.secho("✅ Web adicionada com sucesso! 🌐", fg="green", bold=True)
     except Exception as e:
         click.secho(f"Erro ao adicionar Web: {e}", fg="red", bold=True)
-
 
 # Comando para gerar o requirements.txt
 @click.command()
@@ -211,7 +188,18 @@ def generate_requirements():
     except Exception as e:
         click.secho(f"Erro ao gerar requirements.txt: {e}", fg="red", bold=True)
 
-
+# Função para atualizar o requirements.txt
+def update_requirements(package):
+    """Adiciona pacotes ao requirements.txt e instala a dependência."""
+    try:
+        with open("requirements.txt", "a", encoding="utf-8") as f:
+            f.write(f"{package}\n")
+        subprocess.run(["pip", "install", package], check=True)
+        click.secho(f"{package} instalado e adicionado ao requirements.txt.", fg="green", bold=True)
+    except Exception as e:
+        click.secho(f"Erro ao atualizar requirements.txt: {e}", fg="red", bold=True)
+        raise
+    
 # Comando para executar a aplicação Flask
 @click.command()
 def run_app():
@@ -220,7 +208,6 @@ def run_app():
         os.system("flask run")
     except Exception as e:
         click.secho(f"Erro ao executar a aplicação Flask: {e}", fg="red", bold=True)
-
 
 def get_database_uri(config):
     """Gera a string de conexão do banco de dados dinamicamente."""
@@ -257,7 +244,7 @@ def update_settings_yaml(db_config):
         settings["default"]["DATABASE"] = db_config  # Directly update the DATABASE section
 
         with open(settings_file, "w", encoding="utf-8") as f:
-            yaml.dump(settings, f, default_flow_style=False, allow_unicode=True)
+            yaml.dump(settings, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
         click.secho("✅ settings.yaml atualizado com as novas configurações de banco de dados.", fg="green", bold=True)
     except Exception as e:
@@ -310,7 +297,6 @@ def drop_db():
         os.system("flask db downgrade")
     except Exception as e:
         click.secho(f"Erro ao remover banco de dados: {e}", fg="red", bold=True)
-
 
 # Comando para exibir a versão do flasklaunch
 @click.command()
