@@ -4,4 +4,5 @@ include LICENSE
 include settings.yaml
 
 recursive-include flasklaunch/templates *.html
+recursive-include flasklaunch/templates-basic *
 recursive-include flasklaunch/static *

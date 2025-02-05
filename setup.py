@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="flasklaunch",
-    version="0.1.0",
+    version="0.1.2",
     author="Leonan Thomaz",
     author_email="leonan.thomaz@gmail.com",
     description="A tool to quickly launch Flask projects",
